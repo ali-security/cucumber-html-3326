@@ -19,8 +19,9 @@ RUN node -v && npm -v
 
 RUN apt-get update && apt-get install -y maven
 
-RUN git clone --branch v0.2.6 https://github.com/cucumber-attic/cucumber-html.git && \
-    cd cucumber-html
+WORKDIR /app
+
+COPY . .
 
 # Force NPM to use HTTP (fixes SSL errors on Node 0.8)
 RUN npm config set registry http://registry.npmjs.org/
@@ -35,6 +36,8 @@ RUN npm Install
 # Package the project into a JAR without signing or releasing it
 RUN mvn clean install
 
-# Set up the working directory
-WORKDIR /app
-CMD ["bash"]
+# Mount point for the host to receive the built JAR
+VOLUME /output
+
+# Copy the built JAR into the mounted output directory when the container runs
+CMD cp /app/target/*.jar /output/

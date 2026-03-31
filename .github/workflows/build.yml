@@ -17,16 +17,14 @@ jobs:
       - name: Build Docker image
         run: docker build -t cucumber-html-builder -f dockerfile .
 
-      - name: Extract JAR from image
+      - name: Extract JAR via volume
         run: |
-          id=$(docker create cucumber-html-builder)
           mkdir -p target
-          docker cp "$id:/cucumber-html/target/cucumber-html-0.2.6.jar" target/
-          docker rm "$id"
+          docker run --rm -v "$(pwd)/target:/output" cucumber-html-builder
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: cucumber-html
-          path: target/cucumber-html-0.2.6.jar
+          path: target/*.jar
           if-no-files-found: error
